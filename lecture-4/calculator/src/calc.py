@@ -52,7 +52,9 @@ class CalculatorApp(ft.Container):
                         ExtraActionButton(text="log", button_clicked=self.button_clicked),
                         ExtraActionButton(text="√", button_clicked=self.button_clicked),
                         ExtraActionButton(text="e", button_clicked=self.button_clicked),
+                        ExtraActionButton(text="π", button_clicked=self.button_clicked),
                         ExtraActionButton(text="x^y", button_clicked=self.button_clicked),
+                        
                     ]
                 ),
                 ft.Row(
@@ -60,7 +62,7 @@ class CalculatorApp(ft.Container):
                         ExtraActionButton(text="AC", button_clicked=self.button_clicked),
                         ExtraActionButton(text="+/-", button_clicked=self.button_clicked),
                         ExtraActionButton(text="%", button_clicked=self.button_clicked),
-                        ActionButton(text="/", button_clicked=self.button_clicked)
+                        ActionButton(text="÷", button_clicked=self.button_clicked)
                     ]
                 ),
                 ft.Row(
@@ -68,7 +70,7 @@ class CalculatorApp(ft.Container):
                         DigitButton(text="7", button_clicked=self.button_clicked),
                         DigitButton(text="8", button_clicked=self.button_clicked),
                         DigitButton(text="9", button_clicked=self.button_clicked),
-                        ActionButton(text="*", button_clicked=self.button_clicked),
+                        ActionButton(text="×", button_clicked=self.button_clicked),
                     ]
                 ),
                 ft.Row(
@@ -111,7 +113,7 @@ class CalculatorApp(ft.Container):
             else:
                 self.result.value = self.result.value + data
 
-        elif data in ("+", "-", "*", "/", "x^y" ):
+        elif data in ("+", "-", "×", "÷", "x^y" ):
             self.result.value = self.calculate(self.operand1, float(self.result.value), self.operator)
             self.operator = data
             if self.result.value == "Error":
@@ -177,6 +179,11 @@ class CalculatorApp(ft.Container):
             self.result.value = str(self.format_number(math.exp(float(self.result.value))))
             self.new_operand = True
 
+        elif data in ("π"):
+            import math
+            self.result.value = str(self.format_number(math.pi))
+            self.new_operand = True
+
         
 
         self.update()
@@ -195,10 +202,10 @@ class CalculatorApp(ft.Container):
         elif operator == "-":
             return self.format_number(operand1 - operand2)
 
-        elif operator == "*":
+        elif operator == "×":
             return self.format_number(operand1 * operand2)
 
-        elif operator == "/":
+        elif operator == "÷":
             if operand2 == 0:
                 return "Error"
             else:
