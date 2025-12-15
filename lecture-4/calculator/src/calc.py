@@ -13,14 +13,14 @@ class CalcButton(ft.ElevatedButton):
 class DigitButton(CalcButton):
     def __init__(self, text, button_clicked, expand=1):
         CalcButton.__init__(self, text, button_clicked, expand)
-        self.bgcolor = ft.Colors.WHITE24
-        self.color = ft.Colors.WHITE
+        self.bgcolor = ft.Colors.YELLOW_100
+        self.color = ft.Colors.BLACK
 
 
 class ActionButton(CalcButton):
     def __init__(self, text, button_clicked):
         CalcButton.__init__(self, text, button_clicked)
-        self.bgcolor = ft.Colors.ORANGE
+        self.bgcolor = ft.Colors.BLUE
         self.color = ft.Colors.WHITE
 
 
@@ -36,8 +36,8 @@ class CalculatorApp(ft.Container):
         super().__init__()
         self.reset()
 
-        self.result = ft.Text(value="0", color=ft.Colors.WHITE, size=20)
-        self.width = 350
+        self.result = ft.Text(value="0", color=ft.Colors.WHITE, size=40)
+        self.width = 450
         self.bgcolor = ft.Colors.BLACK
         self.border_radius = ft.border_radius.all(20)
         self.padding = 20
@@ -46,10 +46,21 @@ class CalculatorApp(ft.Container):
                 ft.Row(controls=[self.result], alignment="end"),
                 ft.Row(
                     controls=[
+                        ExtraActionButton(text="sin", button_clicked=self.button_clicked),
+                        ExtraActionButton(text="cos", button_clicked=self.button_clicked),
+                        ExtraActionButton(text="tan", button_clicked=self.button_clicked),
+                        ExtraActionButton(text="log", button_clicked=self.button_clicked),
+                        ExtraActionButton(text="√", button_clicked=self.button_clicked),
+                        ExtraActionButton(text="e", button_clicked=self.button_clicked),
+                        ExtraActionButton(text="x^y", button_clicked=self.button_clicked),
+                    ]
+                ),
+                ft.Row(
+                    controls=[
                         ExtraActionButton(text="AC", button_clicked=self.button_clicked),
                         ExtraActionButton(text="+/-", button_clicked=self.button_clicked),
                         ExtraActionButton(text="%", button_clicked=self.button_clicked),
-                        ActionButton(text="/", button_clicked=self.button_clicked),
+                        ActionButton(text="/", button_clicked=self.button_clicked)
                     ]
                 ),
                 ft.Row(
@@ -100,7 +111,7 @@ class CalculatorApp(ft.Container):
             else:
                 self.result.value = self.result.value + data
 
-        elif data in ("+", "-", "*", "/"):
+        elif data in ("+", "-", "*", "/", "x^y" ):
             self.result.value = self.calculate(self.operand1, float(self.result.value), self.operator)
             self.operator = data
             if self.result.value == "Error":
@@ -123,6 +134,50 @@ class CalculatorApp(ft.Container):
 
             elif float(self.result.value) < 0:
                 self.result.value = str(self.format_number(abs(float(self.result.value))))
+
+        elif data in ("sin"):
+            import math
+            self.result.value = str(self.format_number(math.sin(math.radians(float(self.result.value)))))
+            self.new_operand = True 
+        
+        elif data in ("cos"):
+            import math
+            self.result.value = str(self.format_number(math.cos(math.radians(float(self.result.value)))))
+            self.new_operand = True
+        
+        elif data in ("tan"):
+            import math
+            self.result.value = str(self.format_number(math.tan(math.radians(float(self.result.value)))))
+            self.new_operand = True
+        
+        elif data in ("x^y"):
+            self.result.value = self.calculate(self.operand1, float(self.result.value), self.operator)
+            self.operator = data
+            if self.result.value == "Error":
+                self.operand1 = "0"
+            else:
+                self.operand1 = float(self.result.value)
+            self.new_operand = True
+        
+        elif data in ("log"):
+            import math
+            if float(self.result.value) <= 0:
+                self.result.value = "Error"
+            else:
+                self.result.value = str(self.format_number(math.log10(float(self.result.value))))
+            self.new_operand = True
+
+        elif data in ("√"):
+            import math
+            self.result.value = str(self.format_number(math.sqrt(float(self.result.value))))
+            self.new_operand = True
+
+        elif data in ("e"):
+            import math
+            self.result.value = str(self.format_number(math.exp(float(self.result.value))))
+            self.new_operand = True
+
+        
 
         self.update()
 
@@ -148,6 +203,9 @@ class CalculatorApp(ft.Container):
                 return "Error"
             else:
                 return self.format_number(operand1 / operand2)
+            
+        elif operator == "x^y":
+            return self.format_number(operand1 ** operand2)
 
     def reset(self):
         self.operator = "+"
