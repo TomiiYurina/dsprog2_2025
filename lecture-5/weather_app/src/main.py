@@ -22,8 +22,6 @@ def main(page: ft.Page):
     def get_weather_report(area_code):
         url = f"https://www.jma.go.jp/bosai/forecast/data/forecast/{area_code}.json"
         res = requests.get(url)
-        
-        # 通信エラーチェックをする
         if res.status_code != 200:
             raise Exception("No Data")
         
@@ -40,32 +38,74 @@ def main(page: ft.Page):
         except:
             max_temps = []; min_temps = []
 
+        weather_dict = {
+            "101": "晴れ時々曇り", "102": "晴れ時々雨", "103": "晴れ時々雪",
+            "110": "晴れのち曇り", "111": "晴れのち雨", "112": "晴れのち雪",
+            "201": "曇り時々晴れ", "202": "曇り時々雨", "203": "曇り時々雪",
+            "210": "曇りのち晴れ", "211": "曇りのち雨", "212": "曇りのち雪",
+            "301": "雨時々晴れ", "302": "雨時々曇り", "311": "雨のち晴れ", "312": "雨のち雪"
+        }
+
         weather_cards = ft.Row(wrap=True, spacing=20)
         for t_val, w_code, mx, mn in zip(times, weather_codes, max_temps, min_temps):
-            icon_name = ft.Icons.HELP_OUTLINE
-            icon_color = ft.Colors.GREY_400
-            weather_text = "不明"
-
-            if w_code.startswith("1"):
-                weather_text = "晴れ"; icon_name = ft.Icons.WB_SUNNY; icon_color = ft.Colors.ORANGE
-            elif w_code.startswith("2"):
-                weather_text = "曇り"; icon_name = ft.Icons.CLOUD; icon_color = ft.Colors.GREY_400
-            elif w_code.startswith("3"):
-                weather_text = "雨"; icon_name = ft.Icons.UMBRELLA; icon_color = ft.Colors.BLUE_400
-            elif w_code.startswith("4"):
-                weather_text = "雪"; icon_name = ft.Icons.AC_UNIT; icon_color = ft.Colors.LIGHT_BLUE_200
+            icon_names = []
+            icon_colors = []
             
-            if "8" in w_code:
-                icon_name = ft.Icons.BOLT; icon_color = ft.Colors.AMBER_ACCENT_400
+            # 言葉を辞書から取得（忘れていた部分を修正）
+            weather_text = weather_dict.get(w_code, "不明")
 
+            # 1. 基本のアイコン設定
+            if w_code.startswith("1"):
+                if weather_text == "不明": weather_text = "晴れ"
+                icon_names = [ft.Icons.WB_SUNNY]; icon_colors = [ft.Colors.ORANGE]
+            elif w_code.startswith("2"):
+                if weather_text == "不明": weather_text = "曇り"
+                icon_names = [ft.Icons.CLOUD]; icon_colors = [ft.Colors.GREY_400]
+            elif w_code.startswith("3"):
+                if weather_text == "不明": weather_text = "雨"
+                icon_names = [ft.Icons.UMBRELLA]; icon_colors = [ft.Colors.BLUE_400]
+            elif w_code.startswith("4"):
+                if weather_text == "不明": weather_text = "雪"
+                icon_names = [ft.Icons.AC_UNIT]; icon_colors = [ft.Colors.LIGHT_BLUE_200]
+
+            # 2. 2つセットのアイコン上書き
+            if w_code in ["101", "110"]:
+                icon_names = [ft.Icons.WB_SUNNY, ft.Icons.CLOUD]
+                icon_colors = [ft.Colors.ORANGE, ft.Colors.GREY_400]
+            elif w_code in ["102", "111"]:
+                icon_names = [ft.Icons.WB_SUNNY, ft.Icons.UMBRELLA]
+                icon_colors = [ft.Colors.ORANGE, ft.Colors.BLUE_400]
+            elif w_code in ["201", "210"]:
+                icon_names = [ft.Icons.CLOUD, ft.Icons.WB_SUNNY]
+                icon_colors = [ft.Colors.GREY_400, ft.Colors.ORANGE]
+            elif w_code in ["202", "211"]:
+                icon_names = [ft.Icons.CLOUD, ft.Icons.UMBRELLA]
+                icon_colors = [ft.Colors.GREY_400, ft.Colors.BLUE_400]
+            elif w_code in ["301", "311"]:
+                icon_names = [ft.Icons.UMBRELLA, ft.Icons.WB_SUNNY]
+                icon_colors = [ft.Colors.BLUE_400, ft.Colors.ORANGE]
+            elif w_code == "302":
+                icon_names = [ft.Icons.UMBRELLA, ft.Icons.CLOUD]
+                icon_colors = [ft.Colors.BLUE_400, ft.Colors.GREY_400]
+            
+            # 3. 雷の追加
+            if "8" in w_code:
+                icon_names.append(ft.Icons.BOLT)
+                icon_colors.append(ft.Colors.AMBER_ACCENT_400)
+
+            # --- カードのデザイン ---
             card = ft.Card(
                 elevation=5,
                 content=ft.Container(
                     bgcolor=ft.Colors.WHITE, border_radius=20, padding=20, width=160,
                     content=ft.Column([
                         ft.Text(value=t_val[:10], weight="bold"),
-                        ft.Icon(name=icon_name, color=icon_color, size=40),
-                        ft.Text(value=weather_text),
+                        # アイコンを並べて表示する部分
+                        ft.Row(
+                            [ft.Icon(name=n, color=c, size=30) for n, c in zip(icon_names, icon_colors)],
+                            alignment=ft.MainAxisAlignment.CENTER
+                        ),
+                        ft.Text(value=weather_text, size=12, text_align=ft.TextAlign.CENTER),
                         ft.Row([
                             ft.Text(f"{mx}℃", color=ft.Colors.RED_400, weight="bold"),
                             ft.Text("/"),
