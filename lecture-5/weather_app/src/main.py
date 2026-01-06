@@ -51,10 +51,10 @@ def main(page: ft.Page):
             icon_names = []
             icon_colors = []
             
-            # 言葉を辞書から取得（忘れていた部分を修正）
+            # 言葉を辞書から取得
             weather_text = weather_dict.get(w_code, "不明")
 
-            # 1. 基本のアイコン設定
+            # 基本のアイコン設定する
             if w_code.startswith("1"):
                 if weather_text == "不明": weather_text = "晴れ"
                 icon_names = [ft.Icons.WB_SUNNY]; icon_colors = [ft.Colors.ORANGE]
@@ -68,7 +68,7 @@ def main(page: ft.Page):
                 if weather_text == "不明": weather_text = "雪"
                 icon_names = [ft.Icons.AC_UNIT]; icon_colors = [ft.Colors.LIGHT_BLUE_200]
 
-            # 2. 2つセットのアイコン上書き
+            # 複合アイコンの設定をする
             if w_code in ["101", "110"]:
                 icon_names = [ft.Icons.WB_SUNNY, ft.Icons.CLOUD]
                 icon_colors = [ft.Colors.ORANGE, ft.Colors.GREY_400]
